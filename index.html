@@ -1,0 +1,148 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDo List using JavsScript</title>
+    <!-- Latest compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>ToDo List using JavsScript</h1>
+      <div class="form-group">
+        <textarea
+          id="new_task"
+          class="form-control"
+          placeholder="Add new Task..."
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <button type="button" id="add_new_task" class="btn btn-primary">
+          Add
+        </button>
+      </div>
+      <div class="form-group">
+        <input
+          type="text"
+          id="search"
+          class="form-control"
+          placeholder="Search..."
+        />
+      </div>
+      <div id="listing"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("add_new_task")
+        .addEventListener("click", function () {
+          let new_task = document.getElementById("new_task");
+          if (new_task.value.trim() != "") {
+            let all_task = localStorage.getItem("my_task");
+            let previuosTask = [];
+            if (all_task != null) {
+              previuosTask = JSON.parse(all_task);
+            }
+            const date = new Date();
+            let obj = {};
+            obj["task"] = new_task.value.trim();
+            obj["status"] = 0;
+            obj["added_date"] =
+              date.toLocaleDateString() + "" + date.toLocaleTimeString();
+            obj["updated_date"] =
+              date.toLocaleDateString() + "" + date.toLocaleTimeString();
+            previuosTask.unshift(obj);
+            localStorage.setItem("my_task", JSON.stringify(previuosTask));
+            new_task.value = "";
+            showTask();
+          }
+        });
+      showTask();
+      function showTask() {
+        //document.getElementById("listing").innerHTML = "";
+        let previuosTask = JSON.parse(localStorage.getItem("my_task"));
+        if (previuosTask != null) {
+          let html =
+            '<table class="table"><thead><tr><th scope="col">#</th><th scope="col">Task</th><th scope="col">Status</th><th scope="col">Added Date</th><th scope="col">Updated Date</th><th scope="col">Action</th></tr></thead><tbody>';
+          let searchVal = document.getElementById("search").value;
+          previuosTask.forEach(function (value, index) {
+            let status;
+            if (value.status == 0) {
+              status = "Pending";
+            } else if (value.status == 1) {
+              status = "In Progress";
+            } else if (value.status == 2) {
+              status = "Completed";
+            }
+            let selecteopt1 = value.status == 0 ? "selected" : "";
+            let selecteopt2 = value.status == 1 ? "selected" : "";
+            let selecteopt3 = value.status == 2 ? "selected" : "";
+            let action =
+              '<select class="form-control " ind = "' +
+              index +
+              '" onchange ="changeStatus(this)"><option value="0" ' +
+              selecteopt1 +
+              '>Pending</option><option value="1" ' +
+              selecteopt2 +
+              '>In Progress</option><option value="2" ' +
+              selecteopt3 +
+              '>Completed</option><option value="3">Delete</option></select>';
+            let display = "";
+            if (searchVal != "") {
+              if (
+                value.task.toLowerCase().indexOf(searchVal.toLowerCase()) ==
+                  -1 &&
+                status.toLowerCase().indexOf(searchVal.toLowerCase()) == -1
+              ) {
+                display = "hide";
+              }
+            }
+            html +=
+              '<tr class="' +
+              display +
+              '"><td>' +
+              (index + 1) +
+              "</td><td>" +
+              value.task +
+              "</td><td>" +
+              status +
+              "</td><td>" +
+              value.added_date +
+              "</td><td>" +
+              value.updated_date +
+              "</td><td>" +
+              action +
+              "</td></tr>";
+          });
+
+          html += "</tbody></table>";
+          document.getElementById("listing").innerHTML = html;
+        }
+      }
+      function changeStatus(vl) {
+        let val = vl.value;
+        let ind = vl.getAttribute("ind");
+        const date = new Date();
+        let previuosTask = JSON.parse(localStorage.getItem("my_task"));
+        if (val != 3) {
+          previuosTask[ind].status = val;
+          previuosTask[ind].updated_date =
+            date.toLocaleDateString() + "" + date.toLocaleTimeString();
+        } else {
+          previuosTask.splice(ind, 1);
+        }
+        localStorage.setItem("my_task", JSON.stringify(previuosTask));
+        showTask();
+      }
+      document.getElementById("search").addEventListener("keyup", function () {
+        showTask();
+      });
+    </script>
+  </body>
+</html>
